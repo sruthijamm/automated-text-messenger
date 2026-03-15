@@ -1,21 +1,29 @@
 import os
+from ai_generator import generate_message
+from tone_checker import check_tone
+from dotenv import load_dotenv
 
-def get_words(file_path):
-    with open(file_path, 'r') as f:
-        text = f.readlines()[0]
-        words = text.split()
-    return words
-
-def get_lines(file_path):
-    with open(file_path, 'r') as f:
-        text = f.readlines()
-    return text
+load_dotenv()
 
 def send_message(phone_number, message):
     os.system('osascript send.scpt {} "{}"'.format(phone_number, message))
 
 if __name__ == '__main__':
-    phone_number = '6479274585'
-    words = get_lines('messagefile.txt')
-    for word in words:
-        send_message(phone_number ,word)
+    phone_number = os.getenv('PHONE_NUMBER')
+    
+    prompt = input("What kind of message do you want to send? ")
+    
+    print("\nGenerating message...")
+    message = generate_message(prompt)
+    print(f"\nGenerated message:\n{message}")
+    
+    print("\nChecking tone...")
+    tone = check_tone(message)
+    print(f"Tone check: {tone}")
+    
+    confirm = input("\nSend this message? (yes/no): ")
+    if confirm.lower() == 'yes':
+        send_message(phone_number, message)
+        print("Message sent!")
+    else:
+        print("Message cancelled.")
